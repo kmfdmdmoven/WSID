@@ -1,0 +1,133 @@
+{
+  "common": {
+    "start": "Start",
+    "continue": "Continue",
+    "reveal": "Reveal",
+    "submit": "Submit",
+    "comingSoon": "Coming Soon",
+    "settings": "Settings",
+    "back": "Back",
+    "english": "English",
+    "ukrainian": "Ukrainian"
+  },
+  "welcome": {
+    "title": "What Should I Do?",
+    "subtitle": "Listen to your first reaction.",
+    "onboarding": "Sometimes your feelings answer before your thoughts."
+  },
+  "auth": {
+    "title": "Continue your journey",
+    "subtitle": "Save your reflections or continue as a guest.",
+    "guest": "Continue as Guest",
+    "apple": "Continue with Apple",
+    "google": "Continue with Google",
+    "email": "Continue with Email",
+    "disabledHint": "Coming soon"
+  },
+  "question": {
+    "title": "What's on your mind?",
+    "questionLabel": "What is your question?",
+    "optionALabel": "Option A",
+    "optionBLabel": "Option B",
+    "validationError": "Please fill in all fields before continuing."
+  },
+  "reveal": {
+    "title": "Thoughts connecting",
+    "subtitle": "Notice what arises."
+  },
+  "result": {
+    "label": "The thought that emerged",
+    "subtitle": "Notice the feeling that arrived with it."
+  },
+  "emotion": {
+    "title": "What's your first reaction?",
+    "helper": "Don't overthink. Tap the one your body says."
+  },
+  "emotions": {
+    "loveIt": "Love It",
+    "feelsRight": "Feels Right",
+    "doesntFeelRight": "Doesn't Feel Right",
+    "disappointed": "Disappointed"
+  },
+  "insight": {
+    "feelsRight": {
+      "headline": "You already knew.",
+      "body": "The moment you saw the result, your feelings answered before your thoughts.",
+      "footer": "Trust yourself."
+    },
+    "notSure": {
+      "headline": "Interesting.",
+      "body": "Your reaction wasn't clear yet.\nMaybe you need a little more time.",
+      "footer": "Clarity often arrives quietly."
+    },
+    "disappointed": {
+      "headline": "Maybe the other option deserves another look.",
+      "body": "Your disappointment appeared before your explanation.\nSometimes that means part of you was already leaning somewhere else.",
+      "footer": "You can always change your mind."
+    }
+  },
+  "insight_negative": {
+    "alternativeLabel": "What you may have wanted",
+    "preHeadlines": [
+      "Maybe the other option deserves another look.",
+      "Your reaction pointed somewhere else.",
+      "Something in you pushed back."
+    ],
+    "preBodies": [
+      "Your reaction appeared before your explanation.",
+      "Sometimes disappointment is information.",
+      "The other path was still there."
+    ],
+    "finalHeadlines": [
+      "You may have known before you started.",
+      "Your reaction helped reveal it.",
+      "The answer was in the reaction."
+    ],
+    "finalBodies": [
+      "You did not choose this option directly. You noticed your reaction to losing it.",
+      "Sometimes we discover what we want by noticing what we reject.",
+      "This is not certainty. It is a signal worth listening to."
+    ],
+    "finalFooters": [
+      "Follow what you noticed.",
+      "Your first reaction matters.",
+      "This is what you already knew."
+    ]
+  },
+  "ad": {
+    "title": "Ad break",
+    "subtitle": "Your next choice is loading."
+  },
+  "actionHub": {
+    "title": "What next?",
+    "tryAnother": "Try Another Choice",
+    "exploreApps": "Explore More Apps",
+    "earlyAccess": "Join Early Access",
+    "share": "Share",
+    "rateApp": "Rate App"
+  },
+  "appHub": {
+    "title": "Explore More Apps",
+    "movenbit": "MovenBit",
+    "movenbitDesc": "Track movement and mindfulness.",
+    "reading": "See What You're Reading",
+    "readingDesc": "Understand your reading habits.",
+    "comingSoonTitle": "Coming Soon",
+    "comingSoonDesc": "More thoughtful tools on the way."
+  },
+  "earlyAccess": {
+    "title": "Join Early Access",
+    "subtitle": "Be the first to know when new features arrive.",
+    "emailPlaceholder": "your@email.com",
+    "success": "You're on the list. Thank you!",
+    "invalidEmail": "Please enter a valid email address."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "sound": "Sound",
+    "haptics": "Haptics",
+    "on": "On",
+    "off": "Off"
+  }
+}
