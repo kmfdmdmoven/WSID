@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { useNeural } from '../context/NeuralContext';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors } from '../constants/colors';
 import { track } from '../services/analytics';
@@ -12,13 +14,16 @@ type Props = NativeStackScreenProps<RootStackParamList, 'AdPlaceholder'>;
 
 export function AdPlaceholderScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { setNeuralMode } = useNeural();
+
+  useFocusEffect(useCallback(() => { setNeuralMode('idle', 0.5); }, [setNeuralMode]));
 
   useEffect(() => {
     track('ad_placeholder_shown');
   }, []);
 
   return (
-    <ScreenContainer neuralMode="idle" neuralIntensity={0.5}>
+    <ScreenContainer>
       <View style={styles.body}>
         <View style={styles.adCard}>
           <Text style={styles.adLabel}>Ad</Text>

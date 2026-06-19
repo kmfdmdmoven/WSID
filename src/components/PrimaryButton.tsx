@@ -4,8 +4,10 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  View,
   ViewStyle,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost';
@@ -16,6 +18,8 @@ interface PrimaryButtonProps {
   variant?: ButtonVariant;
   disabled?: boolean;
   loading?: boolean;
+  soonLabel?: string; // shows a small tag when disabled (e.g. "Незабаром")
+  icon?: React.ComponentProps<typeof Feather>['name'];
   style?: ViewStyle;
 }
 
@@ -25,6 +29,8 @@ export function PrimaryButton({
   variant = 'primary',
   disabled = false,
   loading = false,
+  soonLabel,
+  icon,
   style,
 }: PrimaryButtonProps) {
   const isDisabled = disabled || loading;
@@ -36,27 +42,48 @@ export function PrimaryButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
-        variant === 'primary' && styles.primary,
-        variant === 'secondary' && styles.secondary,
-        variant === 'ghost' && styles.ghost,
-        isDisabled && styles.disabled,
+        isDisabled        ? styles.disabled
+          : variant === 'primary'   ? styles.primary
+          : variant === 'secondary' ? styles.secondary
+          : styles.ghost,
         pressed && !isDisabled && styles.pressed,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.buttonPrimaryText : colors.textPrimary} />
+        <ActivityIndicator color={colors.buttonPrimaryGoldText} />
       ) : (
-        <Text
-          style={[
-            styles.label,
-            variant === 'primary' && styles.primaryLabel,
-            variant !== 'primary' && styles.secondaryLabel,
-            isDisabled && styles.disabledLabel,
-          ]}
-        >
-          {label}
-        </Text>
+        <View style={styles.row}>
+          {icon ? (
+            <Feather
+              name={icon}
+              size={18}
+              color={
+                isDisabled        ? colors.disabledText
+                  : variant === 'primary'   ? colors.buttonPrimaryGoldText
+                  : variant === 'secondary' ? colors.buttonSecondaryText
+                  : colors.buttonGhostGoldText
+              }
+              style={styles.iconLeft}
+            />
+          ) : null}
+          <Text
+            style={[
+              styles.label,
+              isDisabled        ? styles.disabledLabel
+                : variant === 'primary'   ? styles.primaryLabel
+                : variant === 'secondary' ? styles.secondaryLabel
+                : styles.ghostLabel,
+            ]}
+          >
+            {label}
+          </Text>
+          {isDisabled && soonLabel ? (
+            <View style={styles.soonBadge}>
+              <Text style={styles.soonText}>{soonLabel}</Text>
+            </View>
+          ) : null}
+        </View>
       )}
     </Pressable>
   );
@@ -71,37 +98,59 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 16,
   },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconLeft: {
+    marginRight: 8,
+  },
   primary: {
-    backgroundColor: colors.buttonPrimary,
+    backgroundColor: colors.buttonPrimaryBg,
+    borderWidth: 1,
+    borderColor: colors.buttonPrimaryBorder,
   },
   secondary: {
-    backgroundColor: colors.cardBackground,
+    backgroundColor: colors.buttonSecondaryBg,
     borderWidth: 1,
-    borderColor: colors.cardBorder,
+    borderColor: colors.buttonSecondaryBorder,
   },
   ghost: {
     backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.buttonGhostBorder,
   },
   disabled: {
-    backgroundColor: colors.buttonDisabled,
-    borderColor: colors.buttonDisabled,
+    backgroundColor: 'rgba(255,255,255,0.04)',
   },
   pressed: {
     opacity: 0.85,
   },
   label: {
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   primaryLabel: {
-    color: colors.buttonPrimaryText,
+    color: colors.buttonPrimaryGoldText,
   },
   secondaryLabel: {
-    color: colors.buttonGhostText,
+    color: colors.buttonSecondaryText,
+  },
+  ghostLabel: {
+    color: colors.buttonGhostGoldText,
   },
   disabledLabel: {
-    color: colors.buttonDisabledText,
+    color: colors.disabledText,
+  },
+  soonBadge: {
+    marginLeft: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  soonText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 11,
+    fontWeight: '500',
+    letterSpacing: 0.5,
   },
 });

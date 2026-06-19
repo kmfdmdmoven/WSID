@@ -1,8 +1,8 @@
 {
   "common": {
-    "start": "Start",
+    "start": "Hear Yourself",
     "continue": "Continue",
-    "reveal": "Reveal",
+    "reveal": "Look Closer",
     "submit": "Submit",
     "comingSoon": "Coming Soon",
     "settings": "Settings",
@@ -37,7 +37,8 @@
   },
   "result": {
     "label": "The thought that emerged",
-    "subtitle": "Notice the feeling that arrived with it."
+    "subtitle": "Notice the feeling that arrived with it.",
+    "anchor": "Trust yourself."
   },
   "emotion": {
     "title": "What's your first reaction?",

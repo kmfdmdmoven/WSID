@@ -1,6 +1,5 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { colors } from '../constants/colors';
 import type { RootStackParamList } from '../types';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
 import { AuthScreen } from '../screens/AuthScreen';
@@ -21,8 +20,8 @@ export function AppNavigator() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.background },
-        animation: 'fade',
+        contentStyle: { backgroundColor: 'transparent' },
+        animation: 'none',
       }}
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />

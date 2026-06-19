@@ -1,15 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { ProgressiveReveal } from '../components/ProgressiveReveal';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { isPositiveEmotion } from '../constants/emotions';
 import { colors } from '../constants/colors';
 import { useDecision } from '../context/DecisionContext';
+import { useNeural } from '../context/NeuralContext';
 import { track } from '../services/analytics';
 import { getInsightKeys } from '../utils/reflectionPhrases';
-import type { NeuralMode, RootStackParamList } from '../types';
+import type { RootStackParamList } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Insight'>;
 
@@ -29,12 +32,12 @@ function pickRandom(arr: string[]): string {
 export function InsightScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const { session } = useDecision();
+  const { setNeuralMode } = useNeural();
   const [networkState, setNetworkState] = useState<NetworkState>('pre');
 
   const isPositive = session.emotion ? isPositiveEmotion(session.emotion) : true;
   const keys = session.emotion ? getInsightKeys(session.emotion) : getInsightKeys('feelsRight');
 
-  // Random phrases picked once on mount
   const prePhrase = useMemo(() => ({
     headline: pickRandom(t('insight_negative.preHeadlines', { returnObjects: true }) as string[]),
     body: pickRandom(t('insight_negative.preBodies', { returnObjects: true }) as string[]),
@@ -45,6 +48,21 @@ export function InsightScreen({ navigation }: Props) {
     body: pickRandom(t('insight_negative.finalBodies', { returnObjects: true }) as string[]),
     footer: pickRandom(t('insight_negative.finalFooters', { returnObjects: true }) as string[]),
   }), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useFocusEffect(useCallback(() => {
+    setNetworkState('pre');
+  }, []));
+
+  // Sync neural mode with flow state
+  useEffect(() => {
+    if (isPositive) {
+      setNeuralMode('emotionPositive');
+    } else if (networkState === 'pre') {
+      setNeuralMode('emotionNegative');
+    } else {
+      setNeuralMode('discovery');
+    }
+  }, [isPositive, networkState, setNeuralMode]);
 
   useEffect(() => {
     track('insight_shown', { emotion: session.emotion, insightOption: session.insightOption });
@@ -71,24 +89,20 @@ export function InsightScreen({ navigation }: Props) {
     }, DISCOVERY_REVEAL_MS);
   };
 
-  // Neural mode follows emotional state
-  const neuralMode: NeuralMode = (() => {
-    if (isPositive) return 'emotionPositive';
-    if (networkState === 'pre') return 'emotionNegative';
-    return 'discovery';
-  })();
-
   // ── Positive flow ─────────────────────────────────────────────────────────
   if (isPositive) {
     return (
-      <ScreenContainer neuralMode={neuralMode}>
+      <ScreenContainer>
         <View style={styles.body}>
-          <Text style={styles.headline}>{t(keys.headline)}</Text>
-          {session.insightOption ? (
-            <Text style={styles.highlight}>{session.insightOption}</Text>
-          ) : null}
-          <Text style={styles.bodyText}>{t(keys.body)}</Text>
-          <Text style={styles.footer}>{t(keys.footer)}</Text>
+          <ProgressiveReveal cadence={480} delay={300}>
+            <Text style={styles.headline}>{t(keys.headline)}</Text>
+            {session.insightOption ? (
+              <Text style={styles.highlight}>{session.insightOption}</Text>
+            ) : <View />}
+            <Text style={styles.bodyText}>{t(keys.body)}</Text>
+            <View style={styles.footerSpacer} />
+            <Text style={styles.footer}>{t(keys.footer)}</Text>
+          </ProgressiveReveal>
         </View>
         <PrimaryButton
           label={t('common.continue')}
@@ -101,12 +115,10 @@ export function InsightScreen({ navigation }: Props) {
   // ── Negative: alternative card as visual center ───────────────────────────
   if (networkState !== 'confirmed') {
     return (
-      <ScreenContainer neuralMode={neuralMode}>
+      <ScreenContainer>
         <View style={styles.body}>
-          {/* Short anchor above card */}
           <Text style={styles.preHeadline}>{prePhrase.headline}</Text>
 
-          {/* Card — the visual hero of this screen */}
           <Text style={styles.alternativeLabel}>
             {t('insight_negative.alternativeLabel')}
           </Text>
@@ -122,7 +134,6 @@ export function InsightScreen({ navigation }: Props) {
             <Text style={styles.alternativeText}>{session.alternativeOption}</Text>
           </Pressable>
 
-          {/* Small reflection below */}
           <Text style={styles.preSubtext}>{prePhrase.body}</Text>
         </View>
       </ScreenContainer>
@@ -131,12 +142,15 @@ export function InsightScreen({ navigation }: Props) {
 
   // ── Negative: discovery confirmed — final reflection ──────────────────────
   return (
-    <ScreenContainer neuralMode={neuralMode}>
+    <ScreenContainer>
       <View style={styles.body}>
-        <Text style={styles.highlight}>{session.alternativeOption}</Text>
-        <Text style={styles.headline}>{finalPhrase.headline}</Text>
-        <Text style={styles.bodyText}>{finalPhrase.body}</Text>
-        <Text style={styles.footer}>{finalPhrase.footer}</Text>
+        <ProgressiveReveal cadence={520} delay={400}>
+          <Text style={styles.highlight}>{session.alternativeOption}</Text>
+          <Text style={styles.headline}>{finalPhrase.headline}</Text>
+          <Text style={styles.bodyText}>{finalPhrase.body}</Text>
+          <View style={styles.footerSpacer} />
+          <Text style={styles.footer}>{finalPhrase.footer}</Text>
+        </ProgressiveReveal>
       </View>
       <PrimaryButton
         label={t('common.continue')}
@@ -171,9 +185,13 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   footer: {
-    color: colors.textMuted,
-    fontSize: 14,
+    color: 'rgba(255,255,255,0.70)',
+    fontSize: 17,
     fontStyle: 'italic',
+    lineHeight: 26,
+  },
+  footerSpacer: {
+    height: 8,
   },
   preHeadline: {
     color: colors.textSecondary,

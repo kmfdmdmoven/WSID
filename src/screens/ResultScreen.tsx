@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { EmotionCard } from '../components/EmotionCard';
+import { ProgressiveReveal } from '../components/ProgressiveReveal';
 import { EMOTIONS, isPositiveEmotion } from '../constants/emotions';
+import { useNeural } from '../context/NeuralContext';
 import { colors } from '../constants/colors';
 import { useDecision } from '../context/DecisionContext';
 import { track } from '../services/analytics';
 import { lightImpact } from '../services/haptics';
 import { playEmotionTap } from '../services/sound';
-import type { Emotion, NeuralMode, RootStackParamList } from '../types';
+import type { Emotion, RootStackParamList } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
 
@@ -20,11 +23,25 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
 const POSITIVE_PAUSE_MS = 1800;
 const NEGATIVE_PAUSE_MS = 3500;
 
+// Anchor appears 800ms after focus — after the screen fades in (~280ms), user reads the
+// result text, then anchor fades in as a separate reveal beat (design-system §11)
+const ANCHOR_DELAY_MS = 800;
+
 export function ResultScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const { session, setEmotion } = useDecision();
-  const [neuralMode, setNeuralMode] = useState<NeuralMode>('result');
+  const { setNeuralMode } = useNeural();
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [anchorVisible, setAnchorVisible] = useState(false);
+
+  useFocusEffect(useCallback(() => {
+    setNeuralMode('result');
+    setIsTransitioning(false);
+    setAnchorVisible(false);
+
+    const timer = setTimeout(() => setAnchorVisible(true), ANCHOR_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [setNeuralMode]));
 
   useEffect(() => {
     track('result_shown', { selectedOption: session.selectedOption });
@@ -53,11 +70,17 @@ export function ResultScreen({ navigation }: Props) {
   };
 
   return (
-    <ScreenContainer neuralMode={neuralMode}>
+    <ScreenContainer>
       <View style={styles.reveal}>
         <Text style={styles.label}>{t('result.label')}</Text>
         <Text style={styles.result}>{session.selectedOption}</Text>
         <Text style={styles.subtitle}>{t('result.subtitle')}</Text>
+
+        {anchorVisible && (
+          <ProgressiveReveal key="anchor" delay={0} cadence={0}>
+            <Text style={styles.anchor}>{t('result.anchor')}</Text>
+          </ProgressiveReveal>
+        )}
       </View>
 
       <View
@@ -70,7 +93,7 @@ export function ResultScreen({ navigation }: Props) {
           {EMOTIONS.slice(0, 2).map((emotion) => (
             <EmotionCard
               key={emotion.id}
-              emoji={emotion.emoji}
+              icon={emotion.icon}
               label={t(emotion.labelKey)}
               onPress={() => handleEmotion(emotion.id)}
             />
@@ -80,7 +103,7 @@ export function ResultScreen({ navigation }: Props) {
           {EMOTIONS.slice(2).map((emotion) => (
             <EmotionCard
               key={emotion.id}
-              emoji={emotion.emoji}
+              icon={emotion.icon}
               label={t(emotion.labelKey)}
               onPress={() => handleEmotion(emotion.id)}
             />
@@ -118,6 +141,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 16,
+  },
+  anchor: {
+    color: colors.buttonPrimaryGoldText,
+    fontSize: 19,
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 28,
+    fontWeight: '400',
+    lineHeight: 28,
   },
   emotionSection: {
     paddingBottom: 8,

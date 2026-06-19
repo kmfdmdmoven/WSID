@@ -1,33 +1,44 @@
-import React from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../constants/colors';
-import type { NeuralMode } from '../types';
-import { NeuralThoughtNetwork } from './NeuralThoughtNetwork';
 
 interface ScreenContainerProps {
   children: React.ReactNode;
-  neuralMode?: NeuralMode;
-  showNeural?: boolean;
-  neuralIntensity?: number;
   style?: ViewStyle;
   contentStyle?: ViewStyle;
 }
 
-export function ScreenContainer({
-  children,
-  neuralMode = 'idle',
-  showNeural = true,
-  neuralIntensity = 1,
-  style,
-  contentStyle,
-}: ScreenContainerProps) {
+export function ScreenContainer({ children, style, contentStyle }: ScreenContainerProps) {
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Wait 2 frames for React layout to fully complete before revealing content.
+    // Without this, text reflows mid-animation and the user sees "jump" renders.
+    let raf1: ReturnType<typeof requestAnimationFrame>;
+    let raf2: ReturnType<typeof requestAnimationFrame>;
+
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 280,
+          useNativeDriver: true,
+        }).start();
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      opacity.setValue(0);
+    };
+  }, [opacity]);
+
   return (
     <SafeAreaView style={[styles.safeArea, style]}>
-      {showNeural ? (
-        <NeuralThoughtNetwork mode={neuralMode} intensity={neuralIntensity} style={styles.neural} />
-      ) : null}
-      <View style={[styles.content, contentStyle]}>{children}</View>
+      <Animated.View style={[styles.content, contentStyle, { opacity }]}>
+        {children}
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -35,16 +46,10 @@ export function ScreenContainer({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
-  },
-  neural: {
-    ...StyleSheet.absoluteFill,
-    zIndex: 0,
-    opacity: 0.9,
+    backgroundColor: 'transparent',
   },
   content: {
     flex: 1,
-    zIndex: 1,
     paddingHorizontal: 24,
     paddingVertical: 16,
   },

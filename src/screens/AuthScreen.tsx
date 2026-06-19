@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { useNeural } from '../context/NeuralContext';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors } from '../constants/colors';
 import { track } from '../services/analytics';
@@ -13,6 +15,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Auth'>;
 
 export function AuthScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { setNeuralMode } = useNeural();
+
+  useFocusEffect(useCallback(() => { setNeuralMode('thinking'); }, [setNeuralMode]));
 
   const handleGuest = async () => {
     await continueAsGuest();
@@ -21,7 +26,7 @@ export function AuthScreen({ navigation }: Props) {
   };
 
   return (
-    <ScreenContainer neuralMode="thinking">
+    <ScreenContainer>
       <View style={styles.body}>
         <Text style={styles.title}>{t('auth.title')}</Text>
         <Text style={styles.subtitle}>{t('auth.subtitle')}</Text>

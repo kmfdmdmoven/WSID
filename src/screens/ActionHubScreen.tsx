@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { Feather } from '@expo/vector-icons';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { useNeural } from '../context/NeuralContext';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors } from '../constants/colors';
 import { useDecision } from '../context/DecisionContext';
@@ -14,6 +17,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'ActionHub'>;
 export function ActionHubScreen({ navigation }: Props) {
   const { t } = useTranslation();
   const { resetSession } = useDecision();
+  const { setNeuralMode } = useNeural();
+
+  useFocusEffect(useCallback(() => { setNeuralMode('idle'); }, [setNeuralMode]));
 
   useEffect(() => {
     track('action_hub_opened');
@@ -35,11 +41,15 @@ export function ActionHubScreen({ navigation }: Props) {
   };
 
   return (
-    <ScreenContainer neuralMode="idle">
+    <ScreenContainer>
       <View style={styles.headerRow}>
         <Text style={styles.title}>{t('actionHub.title')}</Text>
-        <Pressable onPress={() => navigation.navigate('Settings')}>
-          <Text style={styles.settingsLink}>{t('common.settings')}</Text>
+        <Pressable
+          accessibilityLabel={t('common.settings')}
+          onPress={() => navigation.navigate('Settings')}
+          hitSlop={12}
+        >
+          <Feather name="settings" size={22} color={colors.textSecondary} />
         </Pressable>
       </View>
 
@@ -48,30 +58,31 @@ export function ActionHubScreen({ navigation }: Props) {
         <PrimaryButton
           label={t('actionHub.exploreApps')}
           variant="secondary"
+          icon="grid"
           onPress={() => {
             track('app_hub_opened');
             navigation.navigate('AppHub');
           }}
-          style={styles.button}
         />
         <PrimaryButton
           label={t('actionHub.earlyAccess')}
           variant="secondary"
+          icon="mail"
           onPress={() => navigation.navigate('EarlyAccess')}
-          style={styles.button}
         />
         <PrimaryButton
-          label={`${t('actionHub.share')} (${t('common.comingSoon')})`}
+          label={t('actionHub.share')}
           variant="ghost"
+          icon="share"
           disabled
+          soonLabel={t('common.comingSoon')}
           onPress={handleShare}
-          style={styles.button}
         />
         <PrimaryButton
           label={t('actionHub.rateApp')}
           variant="ghost"
+          icon="star"
           onPress={handleRateApp}
-          style={styles.button}
         />
       </View>
     </ScreenContainer>
@@ -91,16 +102,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     flex: 1,
   },
-  settingsLink: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    fontWeight: '600',
-  },
   body: {
     flex: 1,
     justifyContent: 'center',
-  },
-  button: {
-    marginTop: 12,
+    gap: 12,
   },
 });

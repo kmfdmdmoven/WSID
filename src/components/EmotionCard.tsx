@@ -1,22 +1,32 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 
 interface EmotionCardProps {
-  emoji: string;
+  icon: string;
   label: string;
   onPress: () => void;
 }
 
-export function EmotionCard({ emoji, label, onPress }: EmotionCardProps) {
+export function EmotionCard({ icon, label, onPress }: EmotionCardProps) {
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      <Text style={styles.emoji}>{emoji}</Text>
-      <Text style={styles.label}>{label}</Text>
+      {({ pressed }) => (
+        <>
+          <Feather
+            name={icon as React.ComponentProps<typeof Feather>['name']}
+            size={24}
+            color={pressed ? colors.accentGold : colors.textSecondary}
+            style={styles.icon}
+          />
+          <Text style={styles.label}>{label}</Text>
+        </>
+      )}
     </Pressable>
   );
 }
@@ -36,16 +46,15 @@ const styles = StyleSheet.create({
   },
   pressed: {
     borderColor: colors.accentGold,
-    backgroundColor: 'rgba(234, 179, 8, 0.08)',
+    backgroundColor: 'rgba(234,179,8,0.08)',
   },
-  emoji: {
-    fontSize: 32,
-    marginBottom: 8,
+  icon: {
+    marginBottom: 10,
   },
   label: {
     color: colors.textPrimary,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
     textAlign: 'center',
   },
 });

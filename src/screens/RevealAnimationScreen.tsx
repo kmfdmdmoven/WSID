@@ -1,8 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { ProgressiveReveal } from '../components/ProgressiveReveal';
+import { GuidedReflection } from '../components/GuidedReflection';
+import { pickReflectionLines } from '../constants/reflectionPool';
+import { useNeural } from '../context/NeuralContext';
 import { colors } from '../constants/colors';
 import { track } from '../services/analytics';
 import { lightImpact, selectionChanged, successNotification } from '../services/haptics';
@@ -12,16 +17,16 @@ import type { NeuralMode, RootStackParamList } from '../types';
 type Props = NativeStackScreenProps<RootStackParamList, 'RevealAnimation'>;
 
 // Stage timings (ms from mount)
-// Stage 1 – idle:       0   → 500   calm ambient drift
-// Stage 2 – activating: 500 → 1400  nodes brighten, connections pulse
-// Stage 3 – converging: 1400→ 2100  pull to center, bright layer
-// Stage 4 – result:     2100→ 2500  center glow, calm
-// Navigate: 2500
+// Stage 1 – idle:       0    → 600   calm ambient drift
+// Stage 2 – activating: 600  → 1600  nodes brighten, connections pulse
+// Stage 3 – converging: 1600 → 2400  pull to center, bright layer
+// Stage 4 – result:     2400 → 16000 center glow, reflection lines cycle (3×5s), calm
+// Navigate: 16000
 
-const T_ACTIVATING = 500;
-const T_CONVERGING = 1400;
-const T_RESULT = 2100;
-const T_NAVIGATE = 2500;
+const T_ACTIVATING = 600;
+const T_CONVERGING = 1600;
+const T_RESULT = 2400;
+const T_NAVIGATE = 16000;
 
 type Stage = 'idle' | 'activating' | 'converging' | 'result';
 
@@ -34,10 +39,23 @@ const STAGE_MODE: Record<Stage, NeuralMode> = {
 
 export function RevealAnimationScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { setNeuralMode } = useNeural();
   const [stage, setStage] = useState<Stage>('idle');
 
+  // Picked once per mount — stable across re-renders, resets on screen refocus
+  const reflectionLines = useRef(pickReflectionLines());
+
+  useFocusEffect(useCallback(() => {
+    setNeuralMode('idle', 1.1);
+    setStage('idle');
+    reflectionLines.current = pickReflectionLines(); // fresh pick each visit
+  }, [setNeuralMode]));
+
   useEffect(() => {
-    // Kick off immediately: reveal start haptic + sound
+    setNeuralMode(STAGE_MODE[stage], 1.1);
+  }, [stage, setNeuralMode]);
+
+  useEffect(() => {
     lightImpact();
     playRevealStart();
 
@@ -72,9 +90,19 @@ export function RevealAnimationScreen({ navigation }: Props) {
   }, [navigation]);
 
   return (
-    <ScreenContainer neuralMode={STAGE_MODE[stage]} neuralIntensity={1.1} showNeural>
+    <ScreenContainer>
       <View style={styles.overlay}>
-        <Text style={styles.subtitle}>{t('reveal.subtitle')}</Text>
+        {stage !== 'idle' && (
+          <ProgressiveReveal key="title" delay={0} cadence={0}>
+            <Text style={styles.title}>{t('reveal.title')}</Text>
+          </ProgressiveReveal>
+        )}
+        <GuidedReflection
+          active={stage !== 'idle'}
+          lines={reflectionLines.current}
+          lineDuration={5000}
+          fadeMs={600}
+        />
       </View>
     </ScreenContainer>
   );
@@ -85,17 +113,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 20,
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: 16,
+    fontSize: 22,
+    fontWeight: '600',
     textAlign: 'center',
   },
 });

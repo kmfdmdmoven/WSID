@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { Feather } from '@expo/vector-icons';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { useNeural } from '../context/NeuralContext';
 import { colors } from '../constants/colors';
 import { changeLanguage } from '../i18n';
 import { getSettings, saveSettings } from '../services/storage';
@@ -17,6 +20,10 @@ export function SettingsScreen({ navigation }: Props) {
     soundEnabled: true,
     hapticsEnabled: true,
   });
+
+  const { setNeuralMode } = useNeural();
+
+  useFocusEffect(useCallback(() => { setNeuralMode('idle', 0.4); }, [setNeuralMode]));
 
   useEffect(() => {
     getSettings().then(setSettings);
@@ -33,8 +40,9 @@ export function SettingsScreen({ navigation }: Props) {
   };
 
   return (
-    <ScreenContainer neuralMode="idle" showNeural={false}>
-      <Pressable onPress={() => navigation.goBack()} style={styles.back}>
+    <ScreenContainer>
+      <Pressable onPress={() => navigation.goBack()} style={styles.back} hitSlop={8}>
+        <Feather name="chevron-left" size={18} color={colors.textSecondary} />
         <Text style={styles.backText}>{t('common.back')}</Text>
       </Pressable>
 
@@ -93,6 +101,9 @@ export function SettingsScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     marginBottom: 16,
   },
   backText: {

@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { Feather } from '@expo/vector-icons';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { useNeural } from '../context/NeuralContext';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors } from '../constants/colors';
 import { track } from '../services/analytics';
@@ -17,6 +20,10 @@ function isValidEmail(email: string): boolean {
 
 export function EarlyAccessScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { setNeuralMode } = useNeural();
+
+  useFocusEffect(useCallback(() => { setNeuralMode('idle'); }, [setNeuralMode]));
+
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -38,8 +45,9 @@ export function EarlyAccessScreen({ navigation }: Props) {
   };
 
   return (
-    <ScreenContainer neuralMode="idle">
-      <Pressable onPress={() => navigation.goBack()} style={styles.back}>
+    <ScreenContainer>
+      <Pressable onPress={() => navigation.goBack()} style={styles.back} hitSlop={8}>
+        <Feather name="chevron-left" size={18} color={colors.textSecondary} />
         <Text style={styles.backText}>{t('common.back')}</Text>
       </Pressable>
 
@@ -75,6 +83,9 @@ export function EarlyAccessScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   back: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     marginBottom: 16,
   },
   backText: {

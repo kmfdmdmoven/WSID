@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { Feather } from '@expo/vector-icons';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { useNeural } from '../context/NeuralContext';
 import { colors } from '../constants/colors';
 import type { RootStackParamList } from '../types';
 
@@ -10,6 +13,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'AppHub'>;
 
 export function AppHubScreen({ navigation }: Props) {
   const { t } = useTranslation();
+  const { setNeuralMode } = useNeural();
+
+  useFocusEffect(useCallback(() => { setNeuralMode('idle', 0.6); }, [setNeuralMode]));
 
   const cards = [
     { title: t('appHub.movenbit'), desc: t('appHub.movenbitDesc') },
@@ -18,8 +24,9 @@ export function AppHubScreen({ navigation }: Props) {
   ];
 
   return (
-    <ScreenContainer neuralMode="idle" neuralIntensity={0.6}>
-      <Pressable onPress={() => navigation.goBack()} style={styles.back}>
+    <ScreenContainer>
+      <Pressable onPress={() => navigation.goBack()} style={styles.back} hitSlop={8}>
+        <Feather name="chevron-left" size={18} color={colors.textSecondary} />
         <Text style={styles.backText}>{t('common.back')}</Text>
       </Pressable>
 
@@ -39,7 +46,10 @@ export function AppHubScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   back: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
+    gap: 4,
   },
   backText: {
     color: colors.textSecondary,
