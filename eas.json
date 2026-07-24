@@ -1,0 +1,30 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://ahmayjoahuzarjowirhr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFobWF5am9haHV6YXJqb3dpcmhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMDMyNjEsImV4cCI6MjA5ODU3OTI2MX0.KlOaAGQCOiDcMVitxOeaAtOJSgOfr6hTgPrPwLM4XLU",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "387183502030-v87tb4jrvaq38dh7hdnu0os32ju24oas.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "387183502030-8t91cdeo7bv62riajtsi1arl7ml008nh.apps.googleusercontent.com"
+      }
+    },
+    "production": {
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
