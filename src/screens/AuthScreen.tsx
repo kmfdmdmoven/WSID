@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { SceneText } from '../components/SceneText';
 import { useNeural } from '../context/NeuralContext';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors } from '../constants/colors';
@@ -20,7 +21,11 @@ export function AuthScreen({ navigation }: Props) {
   useFocusEffect(useCallback(() => { setNeuralMode('thinking'); }, [setNeuralMode]));
 
   const handleGuest = async () => {
-    await continueAsGuest();
+    const result = await continueAsGuest();
+    if (!result.ok) {
+      track('auth_guest_failed', { errorCategory: result.error.errorCategory });
+      return;
+    }
     track('auth_guest_completed');
     navigation.navigate('Question');
   };
@@ -28,8 +33,12 @@ export function AuthScreen({ navigation }: Props) {
   return (
     <ScreenContainer>
       <View style={styles.body}>
-        <Text style={styles.title}>{t('auth.title')}</Text>
-        <Text style={styles.subtitle}>{t('auth.subtitle')}</Text>
+        <SceneText
+          heading={t('auth.title')}
+          lines={[t('auth.subtitle')]}
+          delay={0}
+          cadence={500}
+        />
       </View>
 
       <PrimaryButton label={t('auth.guest')} onPress={handleGuest} />
@@ -63,17 +72,7 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     justifyContent: 'center',
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: 16,
-    lineHeight: 24,
+    paddingBottom: 32,
   },
   button: {
     marginTop: 12,

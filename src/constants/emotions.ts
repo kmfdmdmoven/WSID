@@ -2,16 +2,17 @@ import type { Emotion } from '../types';
 
 export interface EmotionDefinition {
   id: Emotion;
-  icon: string; // Feather icon name
+  emoji: string;
+  rgb: string; // ring color as "r,g,b" for rgba() glow
   labelKey: string;
   isPositive: boolean;
 }
 
 export const EMOTIONS: EmotionDefinition[] = [
-  { id: 'loveIt',           icon: 'heart',  labelKey: 'emotions.loveIt',           isPositive: true },
-  { id: 'feelsRight',       icon: 'smile',  labelKey: 'emotions.feelsRight',       isPositive: true },
-  { id: 'doesntFeelRight',  icon: 'meh',    labelKey: 'emotions.doesntFeelRight',  isPositive: false },
-  { id: 'disappointed',     icon: 'frown',  labelKey: 'emotions.disappointed',     isPositive: false },
+  { id: 'loveIt',           emoji: '🤩', rgb: '234,179,8',  labelKey: 'emotions.loveIt',           isPositive: true },
+  { id: 'feelsRight',       emoji: '😌', rgb: '74,144,226', labelKey: 'emotions.feelsRight',       isPositive: true },
+  { id: 'doesntFeelRight',  emoji: '😕', rgb: '139,92,246', labelKey: 'emotions.doesntFeelRight',  isPositive: false },
+  { id: 'disappointed',     emoji: '😞', rgb: '226,88,88',  labelKey: 'emotions.disappointed',     isPositive: false },
 ];
 
 export function isPositiveEmotion(emotion: Emotion): boolean {

@@ -1,18 +1,24 @@
 # DvaTipa — Правила та команди співпраці
 
-## Запуск проекту
+## Run / Launch
+
+**Skill:** `expo-ios-launch` (user-level, `~/.claude/skills/expo-ios-launch/SKILL.md`)
+
+| Key | Value |
+|---|---|
+| BUILD_DIR | `/Users/kmfdmdm/APP_DvaTipa/WSID/DvaTipa-WhatShouldIDo` |
+| Native modules | `@shopify/react-native-skia`, `react-native-reanimated` |
+| Runtime | Expo SDK ~56, RN 0.85.3 |
 
 ```bash
-# Вбити старі Metro процеси перед запуском
-pkill -f metro; pkill -f expo
-
-# Запуск
-cd /Users/kmfdmdm/Projects/DvaTipa-WhatShouldIDo
+pkill -f metro; pkill -f expo; true
+cd /Users/kmfdmdm/APP_DvaTipa/WSID/DvaTipa-WhatShouldIDo
 npx expo run:ios
 ```
 
-> Оригінальна папка з пробілами у шляху НЕ підходить для iOS збірки (CocoaPods ламає шлях).
-> Використовувати тільки: `/Users/kmfdmdm/Projects/DvaTipa-WhatShouldIDo`
+> **Why not Expo Go?** `@shopify/react-native-skia` requires a native build. `expo run:ios` only.
+>
+> **Why not Expo Go?** `@shopify/react-native-skia` requires a native build. `expo run:ios` only.
 
 ---
 

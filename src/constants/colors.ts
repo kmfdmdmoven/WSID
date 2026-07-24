@@ -7,6 +7,7 @@ export const colors = {
   rationalBlue: '#4A90E2',
   resistanceBurgundy: '#8B2942',
   uncertaintyViolet: '#8B5CF6',
+  emotionRed: '#E25858',
   cardBackground: 'rgba(255,255,255,0.06)',
   cardBorder: 'rgba(255,255,255,0.12)',
   buttonPrimaryBg:       'rgba(234,179,8,0.16)',

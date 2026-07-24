@@ -25,11 +25,14 @@
     "disabledHint": "Coming soon"
   },
   "question": {
-    "title": "What's on your mind?",
+    "title": "What question won't let go?",
     "questionLabel": "What is your question?",
     "optionALabel": "Option A",
     "optionBLabel": "Option B",
-    "validationError": "Please fill in all fields before continuing."
+    "validationError": "Please fill in all fields before continuing.",
+    "guidance": "One line, no details.",
+    "placeholder": "Type your question…",
+    "next": "Next"
   },
   "reveal": {
     "title": "Thoughts connecting",
@@ -49,51 +52,6 @@
     "feelsRight": "Feels Right",
     "doesntFeelRight": "Doesn't Feel Right",
     "disappointed": "Disappointed"
-  },
-  "insight": {
-    "feelsRight": {
-      "headline": "You already knew.",
-      "body": "The moment you saw the result, your feelings answered before your thoughts.",
-      "footer": "Trust yourself."
-    },
-    "notSure": {
-      "headline": "Interesting.",
-      "body": "Your reaction wasn't clear yet.\nMaybe you need a little more time.",
-      "footer": "Clarity often arrives quietly."
-    },
-    "disappointed": {
-      "headline": "Maybe the other option deserves another look.",
-      "body": "Your disappointment appeared before your explanation.\nSometimes that means part of you was already leaning somewhere else.",
-      "footer": "You can always change your mind."
-    }
-  },
-  "insight_negative": {
-    "alternativeLabel": "What you may have wanted",
-    "preHeadlines": [
-      "Maybe the other option deserves another look.",
-      "Your reaction pointed somewhere else.",
-      "Something in you pushed back."
-    ],
-    "preBodies": [
-      "Your reaction appeared before your explanation.",
-      "Sometimes disappointment is information.",
-      "The other path was still there."
-    ],
-    "finalHeadlines": [
-      "You may have known before you started.",
-      "Your reaction helped reveal it.",
-      "The answer was in the reaction."
-    ],
-    "finalBodies": [
-      "You did not choose this option directly. You noticed your reaction to losing it.",
-      "Sometimes we discover what we want by noticing what we reject.",
-      "This is not certainty. It is a signal worth listening to."
-    ],
-    "finalFooters": [
-      "Follow what you noticed.",
-      "Your first reaction matters.",
-      "This is what you already knew."
-    ]
   },
   "ad": {
     "title": "Ad break",
@@ -129,6 +87,30 @@
     "sound": "Sound",
     "haptics": "Haptics",
     "on": "On",
-    "off": "Off"
+    "off": "Off",
+    "deleteAccount": "Delete account",
+    "deleteTitle": "Delete account?",
+    "deleteMessage": "This is irreversible. Your decision history will be gone forever.",
+    "deleteConfirm": "Delete",
+    "deleteCancel": "Cancel",
+    "deleteRetry": "Try again",
+    "deleteErrorTitle": "Couldn't delete"
+  },
+  "registration": {
+    "overline": "Your trial round is behind you",
+    "title": "Keep your journey",
+    "guidance": "Your discoveries are worth keeping.",
+    "apple": "Continue with Apple",
+    "google": "Continue with Google",
+    "soon": "Soon",
+    "back": "Back",
+    "error": "Couldn't connect right now. Try again — your discoveries aren't going anywhere."
+  },
+  "options": {
+    "overline": "Your question",
+    "guidance": "Name both options.",
+    "optionALabel": "Option A",
+    "optionBLabel": "Option B",
+    "placeholder": "Type the option…"
   }
 }

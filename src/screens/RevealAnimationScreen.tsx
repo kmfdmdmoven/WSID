@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../components/ScreenContainer';
-import { ProgressiveReveal } from '../components/ProgressiveReveal';
-import { GuidedReflection } from '../components/GuidedReflection';
-import { pickReflectionLines } from '../constants/reflectionPool';
+import { SceneText } from '../components/SceneText';
+import { AmbientTextStream } from '../components/AmbientTextStream';
+import { selectPool } from '../utils/phraseSelector';
 import { useNeural } from '../context/NeuralContext';
-import { colors } from '../constants/colors';
 import { track } from '../services/analytics';
 import { lightImpact, selectionChanged, successNotification } from '../services/haptics';
 import { playRevealStart, playRevealConverge, playRevealResult } from '../services/sound';
@@ -38,17 +38,14 @@ const STAGE_MODE: Record<Stage, NeuralMode> = {
 };
 
 export function RevealAnimationScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { setNeuralMode } = useNeural();
   const [stage, setStage] = useState<Stage>('idle');
 
-  // Picked once per mount — stable across re-renders, resets on screen refocus
-  const reflectionLines = useRef(pickReflectionLines());
-
   useFocusEffect(useCallback(() => {
     setNeuralMode('idle', 1.1);
     setStage('idle');
-    reflectionLines.current = pickReflectionLines(); // fresh pick each visit
   }, [setNeuralMode]));
 
   useEffect(() => {
@@ -93,32 +90,37 @@ export function RevealAnimationScreen({ navigation }: Props) {
     <ScreenContainer>
       <View style={styles.overlay}>
         {stage !== 'idle' && (
-          <ProgressiveReveal key="title" delay={0} cadence={0}>
-            <Text style={styles.title}>{t('reveal.title')}</Text>
-          </ProgressiveReveal>
+          <SceneText
+            key="reveal-title"
+            heading={t('reveal.title')}
+            headingSize={22}
+            delay={0}
+          />
         )}
-        <GuidedReflection
-          active={stage !== 'idle'}
-          lines={reflectionLines.current}
-          lineDuration={5000}
-          fadeMs={600}
-        />
       </View>
+      {stage !== 'idle' && (
+        <View style={[styles.streamSlot, { bottom: insets.bottom + 96 }]}>
+          <AmbientTextStream
+            pool={selectPool('priming')}
+            intervalMs={5000}
+            fadeMs={600}
+          />
+        </View>
+      )}
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
+  streamSlot: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+  },
   overlay: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 20,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 22,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 });

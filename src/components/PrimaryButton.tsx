@@ -2,6 +2,7 @@ import React from 'react';
 import {
   ActivityIndicator,
   Pressable,
+  useWindowDimensions,
   StyleSheet,
   Text,
   View,
@@ -9,6 +10,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
+import { ripple } from '../services/neuralFx';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
@@ -34,11 +36,13 @@ export function PrimaryButton({
   style,
 }: PrimaryButtonProps) {
   const isDisabled = disabled || loading;
+  const { width, height } = useWindowDimensions();
 
   return (
     <Pressable
       accessibilityRole="button"
       disabled={isDisabled}
+      onPressIn={(e) => ripple(e.nativeEvent.pageX / width, e.nativeEvent.pageY / height)}
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,

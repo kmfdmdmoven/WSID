@@ -23,6 +23,8 @@ prepare_react_native_project!
 
 target 'WhatShouldIDo' do
   use_expo_modules!
+  # RNGoogleSignin: AppCheckCore Swift pod needs module maps from its ObjC deps
+  use_modular_headers!
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
     config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];

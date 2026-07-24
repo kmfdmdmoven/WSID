@@ -31,10 +31,11 @@ export interface AppSettings {
 export type RootStackParamList = {
   Welcome: undefined;
   Auth: undefined;
+  Registration: undefined;
   Question: undefined;
+  Options: undefined;
   RevealAnimation: undefined;
   Result: undefined;
-  Insight: undefined;
   AdPlaceholder: undefined;
   ActionHub: undefined;
   AppHub: undefined;

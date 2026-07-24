@@ -2,11 +2,11 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
-import { AuthScreen } from '../screens/AuthScreen';
-import { QuestionScreen } from '../screens/QuestionScreen';
+import { QuestionInputScreen } from '../screens/QuestionInputScreen';
+import { OptionsScreen } from '../screens/OptionsScreen';
+import { RegistrationScreen } from '../screens/RegistrationScreen';
 import { RevealAnimationScreen } from '../screens/RevealAnimationScreen';
 import { ResultScreen } from '../screens/ResultScreen';
-import { InsightScreen } from '../screens/InsightScreen';
 import { AdPlaceholderScreen } from '../screens/AdPlaceholderScreen';
 import { ActionHubScreen } from '../screens/ActionHubScreen';
 import { AppHubScreen } from '../screens/AppHubScreen';
@@ -25,11 +25,11 @@ export function AppNavigator() {
       }}
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      <Stack.Screen name="Auth" component={AuthScreen} />
-      <Stack.Screen name="Question" component={QuestionScreen} />
+      <Stack.Screen name="Question" component={QuestionInputScreen} />
+      <Stack.Screen name="Options" component={OptionsScreen} />
+      <Stack.Screen name="Registration" component={RegistrationScreen} />
       <Stack.Screen name="RevealAnimation" component={RevealAnimationScreen} />
       <Stack.Screen name="Result" component={ResultScreen} />
-      <Stack.Screen name="Insight" component={InsightScreen} />
       <Stack.Screen name="AdPlaceholder" component={AdPlaceholderScreen} />
       <Stack.Screen name="ActionHub" component={ActionHubScreen} />
       <Stack.Screen name="AppHub" component={AppHubScreen} />

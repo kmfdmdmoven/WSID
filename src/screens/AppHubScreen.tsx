@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Feather } from '@expo/vector-icons';
+import { BackButton } from '../components/BackButton';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { useNeural } from '../context/NeuralContext';
 import { colors } from '../constants/colors';
@@ -25,10 +26,9 @@ export function AppHubScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
-      <Pressable onPress={() => navigation.goBack()} style={styles.back} hitSlop={8}>
-        <Feather name="chevron-left" size={18} color={colors.textSecondary} />
-        <Text style={styles.backText}>{t('common.back')}</Text>
-      </Pressable>
+      <View style={styles.backSlot}>
+        <BackButton onPress={() => navigation.goBack()} />
+      </View>
 
       <Text style={styles.title}>{t('appHub.title')}</Text>
 
@@ -45,15 +45,9 @@ export function AppHubScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  back: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 4,
-  },
-  backText: {
-    color: colors.textSecondary,
-    fontSize: 16,
+  backSlot: {
+    marginBottom: 8,
+    alignSelf: 'flex-start',
   },
   title: {
     color: colors.textPrimary,

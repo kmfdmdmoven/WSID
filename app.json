@@ -2,6 +2,7 @@
   "expo": {
     "name": "What Should I Do?",
     "slug": "what-should-i-do",
+    "owner": "mister_v",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,9 +15,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.what-should-i-do"
+      "bundleIdentifier": "com.dvatipa.wsid",
+      "usesAppleSignIn": true,
+      "appleTeamId": "GSJY47MLN5"
     },
     "android": {
+      "package": "com.dvatipa.wsid",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#000000"
@@ -27,7 +31,22 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-localization"
-    ]
+      "expo-localization",
+      "expo-secure-store",
+      "expo-apple-authentication",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.387183502030-8t91cdeo7bv62riajtsi1arl7ml008nh"
+        }
+      ],
+      "./plugins/withModularHeaders",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "57bdc8fd-fd5d-4c56-bad9-27e5afb4ec65"
+      }
+    }
   }
 }

@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Feather } from '@expo/vector-icons';
+import { BackButton } from '../components/BackButton';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { useNeural } from '../context/NeuralContext';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -46,10 +47,9 @@ export function EarlyAccessScreen({ navigation }: Props) {
 
   return (
     <ScreenContainer>
-      <Pressable onPress={() => navigation.goBack()} style={styles.back} hitSlop={8}>
-        <Feather name="chevron-left" size={18} color={colors.textSecondary} />
-        <Text style={styles.backText}>{t('common.back')}</Text>
-      </Pressable>
+      <View style={styles.backSlot}>
+        <BackButton onPress={() => navigation.goBack()} />
+      </View>
 
       <View style={styles.body}>
         <Text style={styles.title}>{t('earlyAccess.title')}</Text>
@@ -82,15 +82,9 @@ export function EarlyAccessScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  back: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 16,
-  },
-  backText: {
-    color: colors.textSecondary,
-    fontSize: 16,
+  backSlot: {
+    marginBottom: 8,
+    alignSelf: 'flex-start',
   },
   body: {
     flex: 1,
@@ -112,7 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cardBackground,
     borderColor: colors.cardBorder,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 20,
     color: colors.textPrimary,
     fontSize: 16,
     paddingHorizontal: 16,

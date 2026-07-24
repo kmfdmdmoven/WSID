@@ -8,6 +8,7 @@ import { NeuralProvider, useNeural } from './src/context/NeuralContext';
 import { NeuralThoughtNetwork } from './src/components/NeuralThoughtNetwork';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import i18n, { initI18n } from './src/i18n';
+import { continueAsGuest } from './src/services/auth';
 import { colors } from './src/constants/colors';
 
 const navigationTheme = {
@@ -40,6 +41,13 @@ export default function App() {
 
   useEffect(() => {
     initI18n().finally(() => setReady(true));
+    // Silent anonymous bootstrap: persistence is best effort, the ritual
+    // must start regardless of network state.
+    continueAsGuest().then((result) => {
+      if (!result.ok) {
+        console.log('[auth] Bootstrap failed, continuing offline', result.error.description);
+      }
+    });
   }, []);
 
   if (!ready) {

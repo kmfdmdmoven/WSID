@@ -1,26 +1,29 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import {
-  DEFAULT_OPTION_A,
-  DEFAULT_OPTION_B,
-  DEFAULT_QUESTION,
-} from '../constants/copy';
 import type { DecisionSession, Emotion } from '../types';
 import { pickRandomOption, resolveInsightOption } from '../utils/decisionLogic';
 
+export interface RevealPick {
+  selected: string;
+  alternative: string;
+  revealedOption: 'a' | 'b';
+}
+
 interface DecisionContextValue {
   session: DecisionSession;
+  sessionId: string | null;
+  setSessionId: (id: string | null) => void;
   setQuestion: (question: string) => void;
   setOptionA: (optionA: string) => void;
   setOptionB: (optionB: string) => void;
-  runReveal: () => void;
+  runReveal: () => RevealPick;
   setEmotion: (emotion: Emotion) => void;
   resetSession: () => void;
 }
 
 const initialSession = (): DecisionSession => ({
-  question: DEFAULT_QUESTION,
-  optionA: DEFAULT_OPTION_A,
-  optionB: DEFAULT_OPTION_B,
+  question: '',
+  optionA: '',
+  optionB: '',
   selectedOption: '',
   alternativeOption: '',
   emotion: null,
@@ -31,6 +34,7 @@ const DecisionContext = createContext<DecisionContextValue | null>(null);
 
 export function DecisionProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<DecisionSession>(initialSession);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const setQuestion = useCallback((question: string) => {
     setSession((prev) => ({ ...prev, question }));
@@ -44,7 +48,7 @@ export function DecisionProvider({ children }: { children: React.ReactNode }) {
     setSession((prev) => ({ ...prev, optionB }));
   }, []);
 
-  const runReveal = useCallback(() => {
+  const runReveal = useCallback((): RevealPick => {
     const { selected, alternative } = pickRandomOption(session.optionA, session.optionB);
     setSession((prev) => ({
       ...prev,
@@ -53,6 +57,11 @@ export function DecisionProvider({ children }: { children: React.ReactNode }) {
       emotion: null,
       insightOption: '',
     }));
+    return {
+      selected,
+      alternative,
+      revealedOption: selected === session.optionA ? 'a' : 'b',
+    };
   }, [session.optionA, session.optionB]);
 
   const setEmotion = useCallback(
@@ -69,11 +78,14 @@ export function DecisionProvider({ children }: { children: React.ReactNode }) {
 
   const resetSession = useCallback(() => {
     setSession(initialSession());
+    setSessionId(null);
   }, []);
 
   const value = useMemo(
     () => ({
       session,
+      sessionId,
+      setSessionId,
       setQuestion,
       setOptionA,
       setOptionB,
@@ -81,7 +93,7 @@ export function DecisionProvider({ children }: { children: React.ReactNode }) {
       setEmotion,
       resetSession,
     }),
-    [session, setQuestion, setOptionA, setOptionB, runReveal, setEmotion, resetSession],
+    [session, sessionId, setQuestion, setOptionA, setOptionB, runReveal, setEmotion, resetSession],
   );
 
   return <DecisionContext.Provider value={value}>{children}</DecisionContext.Provider>;

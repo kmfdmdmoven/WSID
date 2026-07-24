@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { SceneText } from '../components/SceneText';
 import { useNeural } from '../context/NeuralContext';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors } from '../constants/colors';
@@ -48,12 +49,16 @@ export function WelcomeScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.title}>{t('welcome.title')}</Text>
-        <Text style={styles.subtitle}>{t('welcome.subtitle')}</Text>
-        <Text style={styles.onboarding}>{t('welcome.onboarding')}</Text>
+        <SceneText
+          heading={t('welcome.title')}
+          lines={[t('welcome.subtitle'), t('welcome.onboarding')]}
+          headingSize={34}
+          delay={0}
+          cadence={550}
+        />
       </View>
 
-      <PrimaryButton label={t('common.start')} onPress={() => navigation.navigate('Auth')} />
+      <PrimaryButton label={t('common.start')} onPress={() => navigation.navigate('Question')} />
     </ScreenContainer>
   );
 }
@@ -83,21 +88,6 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     justifyContent: 'center',
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 36,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: 20,
-    marginBottom: 16,
-  },
-  onboarding: {
-    color: colors.textMuted,
-    fontSize: 16,
-    lineHeight: 24,
+    paddingBottom: 40,
   },
 });

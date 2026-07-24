@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { Feather } from '@expo/vector-icons';
+import { BackButton } from '../components/BackButton';
 import { ScreenContainer } from '../components/ScreenContainer';
 import { useNeural } from '../context/NeuralContext';
 import { colors } from '../constants/colors';
 import { changeLanguage } from '../i18n';
 import { getSettings, saveSettings } from '../services/storage';
+import { deleteAccount } from '../services/auth';
 import type { AppSettings, Language, RootStackParamList } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
@@ -39,35 +40,70 @@ export function SettingsScreen({ navigation }: Props) {
     await updateSettings({ language });
   };
 
+  const [deleting, setDeleting] = useState(false);
+
+  const runDelete = async () => {
+    setDeleting(true);
+    let result: Awaited<ReturnType<typeof deleteAccount>>;
+    try {
+      result = await deleteAccount();
+    } finally {
+      setDeleting(false);
+    }
+    if (result.ok) {
+      console.log('[settings] delete ok, resetting to Welcome');
+      navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
+      return;
+    }
+    Alert.alert(
+      t('settings.deleteErrorTitle'),
+      result.error.description,
+      result.error.isRetryable
+        ? [
+            { text: t('settings.deleteCancel'), style: 'cancel' },
+            { text: t('settings.deleteRetry'), onPress: runDelete },
+          ]
+        : [{ text: t('settings.deleteCancel'), style: 'cancel' }],
+    );
+  };
+
+  const confirmDelete = () => {
+    Alert.alert(t('settings.deleteTitle'), t('settings.deleteMessage'), [
+      { text: t('settings.deleteCancel'), style: 'cancel' },
+      { text: t('settings.deleteConfirm'), style: 'destructive', onPress: runDelete },
+    ]);
+  };
+
   return (
     <ScreenContainer>
-      <Pressable onPress={() => navigation.goBack()} style={styles.back} hitSlop={8}>
-        <Feather name="chevron-left" size={18} color={colors.textSecondary} />
-        <Text style={styles.backText}>{t('common.back')}</Text>
-      </Pressable>
+      <View style={styles.backSlot}>
+        <BackButton onPress={() => navigation.goBack()} />
+      </View>
 
       <Text style={styles.title}>{t('settings.title')}</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
-        <View style={styles.row}>
-          <Pressable
-            onPress={() => toggleLanguage('en')}
-            style={[styles.langButton, i18n.language === 'en' && styles.langActive]}
-          >
-            <Text style={styles.langText}>{t('common.english')}</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => toggleLanguage('uk')}
-            style={[styles.langButton, i18n.language === 'uk' && styles.langActive]}
-          >
-            <Text style={styles.langText}>{t('common.ukrainian')}</Text>
-          </Pressable>
+      <View style={styles.card}>
+        <View style={styles.cardSection}>
+          <Text style={styles.sectionTitle}>{t('settings.language')}</Text>
+          <View style={styles.row}>
+            <Pressable
+              onPress={() => toggleLanguage('en')}
+              style={[styles.langButton, i18n.language === 'en' && styles.langActive]}
+            >
+              <Text style={styles.langText}>{t('common.english')}</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => toggleLanguage('uk')}
+              style={[styles.langButton, i18n.language === 'uk' && styles.langActive]}
+            >
+              <Text style={styles.langText}>{t('common.ukrainian')}</Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <View style={styles.toggleRow}>
+        <View style={styles.divider} />
+
+        <View style={[styles.cardSection, styles.toggleRow]}>
           <Text style={styles.sectionTitle}>{t('settings.sound')}</Text>
           <Switch
             value={settings.soundEnabled}
@@ -76,13 +112,10 @@ export function SettingsScreen({ navigation }: Props) {
             thumbColor={colors.textPrimary}
           />
         </View>
-        <Text style={styles.hint}>
-          {settings.soundEnabled ? t('settings.on') : t('settings.off')}
-        </Text>
-      </View>
 
-      <View style={styles.section}>
-        <View style={styles.toggleRow}>
+        <View style={styles.divider} />
+
+        <View style={[styles.cardSection, styles.toggleRow]}>
           <Text style={styles.sectionTitle}>{t('settings.haptics')}</Text>
           <Switch
             value={settings.hapticsEnabled}
@@ -91,43 +124,55 @@ export function SettingsScreen({ navigation }: Props) {
             thumbColor={colors.textPrimary}
           />
         </View>
-        <Text style={styles.hint}>
-          {settings.hapticsEnabled ? t('settings.on') : t('settings.off')}
-        </Text>
+      </View>
+
+      <View style={styles.dangerZone}>
+        <Pressable onPress={confirmDelete} disabled={deleting} hitSlop={8} style={styles.deleteRow}>
+          {deleting ? (
+            <ActivityIndicator color={colors.error} size="small" />
+          ) : (
+            <Text style={styles.deleteText}>{t('settings.deleteAccount')}</Text>
+          )}
+        </Pressable>
       </View>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  back: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 16,
-  },
-  backText: {
-    color: colors.textSecondary,
-    fontSize: 16,
+  backSlot: {
+    marginBottom: 8,
+    alignSelf: 'flex-start',
   },
   title: {
     color: colors.textPrimary,
     fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 32,
+    fontWeight: '600',
+    marginBottom: 24,
   },
-  section: {
-    marginBottom: 28,
+  card: {
+    backgroundColor: colors.cardBackground,
+    borderWidth: 1,
+    borderColor: colors.cardBorder,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+  },
+  cardSection: {
+    paddingVertical: 16,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.cardBorder,
   },
   sectionTitle: {
     color: colors.textPrimary,
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
+    fontWeight: '500',
   },
   row: {
     flexDirection: 'row',
     gap: 12,
+    marginTop: 12,
   },
   langButton: {
     paddingHorizontal: 16,
@@ -149,9 +194,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  hint: {
-    color: colors.textMuted,
-    fontSize: 14,
-    marginTop: 8,
+  dangerZone: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 24,
+  },
+  // DS destructive: pill like PrimaryButton secondary, error-tinted, no fill
+  deleteRow: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 28,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(255,69,58,0.45)',
+    backgroundColor: 'rgba(255,69,58,0.08)',
+  },
+  deleteText: {
+    color: colors.error,
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

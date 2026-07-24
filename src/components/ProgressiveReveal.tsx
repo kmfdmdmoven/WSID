@@ -1,5 +1,5 @@
 import React, { Children, useEffect, useRef } from 'react';
-import { AccessibilityInfo, Animated } from 'react-native';
+import { AccessibilityInfo, Animated, Easing } from 'react-native';
 
 interface Props {
   children: React.ReactNode;
@@ -11,39 +11,25 @@ export function ProgressiveReveal({ children, cadence = 350, delay = 0 }: Props)
   const childArray = Children.toArray(children);
   const count = childArray.length;
 
-  const animations = useRef(
-    Array.from({ length: count }, () => ({
-      opacity: new Animated.Value(0),
-      translateY: new Animated.Value(10),
-    }))
+  const opacities = useRef(
+    Array.from({ length: count }, () => new Animated.Value(0))
   ).current;
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
       if (reduced) {
-        animations.forEach(({ opacity, translateY }) => {
-          opacity.setValue(1);
-          translateY.setValue(0);
-        });
+        opacities.forEach((op) => op.setValue(1));
         return;
       }
 
-      animations.forEach(({ opacity, translateY }, i) => {
-        const startDelay = delay + i * cadence;
-        Animated.parallel([
-          Animated.timing(opacity, {
-            toValue: 1,
-            duration: 300,
-            delay: startDelay,
-            useNativeDriver: true,
-          }),
-          Animated.timing(translateY, {
-            toValue: 0,
-            duration: 300,
-            delay: startDelay,
-            useNativeDriver: true,
-          }),
-        ]).start();
+      opacities.forEach((opacity, i) => {
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 700,
+          delay: delay + i * cadence,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }).start();
       });
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -51,13 +37,7 @@ export function ProgressiveReveal({ children, cadence = 350, delay = 0 }: Props)
   return (
     <>
       {childArray.map((child, i) => (
-        <Animated.View
-          key={i}
-          style={{
-            opacity: animations[i].opacity,
-            transform: [{ translateY: animations[i].translateY }],
-          }}
-        >
+        <Animated.View key={i} style={{ opacity: opacities[i] }}>
           {child}
         </Animated.View>
       ))}
