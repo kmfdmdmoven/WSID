@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -74,6 +74,8 @@ export function OptionsScreen({ navigation }: Props) {
           <BackButton onPress={() => navigation.goBack()} />
         </View>
 
+        {/* Tap off the inputs dismisses the keyboard */}
+        <Pressable style={styles.flex} onPress={Keyboard.dismiss} accessible={false}>
         {/* The question lives on the canvas — no frames, no pill */}
         <View style={styles.header}>
           <View style={styles.overlineRow}>
@@ -117,6 +119,7 @@ export function OptionsScreen({ navigation }: Props) {
           disabled={!bothNamed}
           onPress={handleReveal}
         />
+        </Pressable>
       </KeyboardAvoidingView>
     </ScreenContainer>
   );

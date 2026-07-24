@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +34,8 @@ export function QuestionInputScreen({ navigation }: Props) {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
+        {/* Tap anywhere off the input dismisses the keyboard (button taps unaffected) */}
+        <Pressable style={styles.flex} onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.body}>
           <SceneText
             heading={t('question.title')}
@@ -56,6 +58,7 @@ export function QuestionInputScreen({ navigation }: Props) {
           disabled={!session.question.trim()}
           onPress={() => navigation.navigate('Options')}
         />
+        </Pressable>
       </KeyboardAvoidingView>
     </ScreenContainer>
   );
