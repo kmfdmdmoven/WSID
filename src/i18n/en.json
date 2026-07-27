@@ -65,7 +65,8 @@
     "share": "Share",
     "rateApp": "Rate App",
     "shareMessage": "WSID — a calm ritual to hear what you already feel about a hard choice.",
-    "history": "Reflection history"
+    "history": "Reflection history",
+    "moreLabel": "More"
   },
   "appHub": {
     "title": "Explore More Apps",
@@ -81,7 +82,8 @@
     "subtitle": "Be the first to know when new features arrive.",
     "emailPlaceholder": "your@email.com",
     "success": "You're on the list. Thank you!",
-    "invalidEmail": "Please enter a valid email address."
+    "invalidEmail": "Please enter a valid email address.",
+    "submitError": "Couldn't submit right now. Please try again shortly."
   },
   "settings": {
     "title": "Settings",

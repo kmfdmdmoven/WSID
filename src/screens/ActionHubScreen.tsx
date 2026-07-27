@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -31,19 +31,7 @@ export function ActionHubScreen({ navigation }: Props) {
     navigation.navigate('Question');
   };
 
-  const handleRateApp = () => {
-    track('rate_app_clicked');
-    Linking.openURL('https://apps.apple.com').catch(() => undefined);
-  };
-
-  const handleShare = async () => {
-    track('share_clicked');
-    try {
-      await Share.share({ message: t('actionHub.shareMessage') });
-    } catch {
-      // user dismissed the share sheet — nothing to do
-    }
-  };
+  // Share + Rate are parked until there's a public store link to point at.
 
   return (
     <ScreenContainer>
@@ -59,6 +47,7 @@ export function ActionHubScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.body}>
+        {/* Group 1 — your ritual (this app) */}
         <PrimaryButton label={t('actionHub.tryAnother')} onPress={handleTryAnother} />
         <PrimaryButton
           label={t('actionHub.history')}
@@ -67,31 +56,21 @@ export function ActionHubScreen({ navigation }: Props) {
           onPress={() => navigation.navigate('History')}
         />
         <PrimaryButton
-          label={t('actionHub.exploreApps')}
-          variant="secondary"
-          icon="grid"
-          onPress={() => {
-            track('app_hub_opened');
-            navigation.navigate('AppHub');
-          }}
-        />
-        <PrimaryButton
           label={t('actionHub.earlyAccess')}
           variant="secondary"
           icon="mail"
           onPress={() => navigation.navigate('EarlyAccess')}
         />
+
+        {/* Group 2 — beyond this app */}
+        <Text style={styles.groupLabel}>{t('actionHub.moreLabel')}</Text>
         <PrimaryButton
-          label={t('actionHub.share')}
-          variant="ghost"
-          icon="share"
-          onPress={handleShare}
-        />
-        <PrimaryButton
-          label={t('actionHub.rateApp')}
-          variant="ghost"
-          icon="star"
-          onPress={handleRateApp}
+          label={t('actionHub.exploreApps')}
+          variant="secondary"
+          icon="grid"
+          disabled
+          soonLabel={t('common.comingSoon')}
+          onPress={() => undefined}
         />
       </View>
     </ScreenContainer>
@@ -115,5 +94,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     gap: 12,
+  },
+  groupLabel: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginTop: 20,
+    marginBottom: 4,
+    marginLeft: 4,
   },
 });

@@ -137,3 +137,18 @@ export async function listSessions(limit = 50): Promise<ListSessionsResult> {
   }
   return { ok: true, rows: (data ?? []) as DecisionRow[] };
 }
+
+/** Collect an early-access email server-side. Duplicate email = success
+    (idempotent — the unique constraint just means "already joined"). */
+export async function submitEarlyAccessEmail(email: string): Promise<SessionResult> {
+  const { data: auth } = await supabase.auth.getSession();
+  const userId = auth.session?.user.id ?? null;
+  const { error } = await supabase.from('early_access').insert({ email, user_id: userId });
+  if (error) {
+    if (error.code === '23505') return { ok: true }; // unique_violation — already joined
+    console.log('[earlyAccess] submit failed', error.message);
+    return { ok: false, error: toSessionError(error.code, error.message) };
+  }
+  console.log('[earlyAccess] email collected');
+  return { ok: true };
+}

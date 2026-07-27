@@ -10,7 +10,7 @@ import { useNeural } from '../context/NeuralContext';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { colors } from '../constants/colors';
 import { track } from '../services/analytics';
-import { saveEarlyAccessEmail } from '../services/storage';
+import { submitEarlyAccessEmail } from '../services/sessions';
 import type { RootStackParamList } from '../types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EarlyAccess'>;
@@ -39,10 +39,14 @@ export function EarlyAccessScreen({ navigation }: Props) {
 
     setLoading(true);
     setError('');
-    await saveEarlyAccessEmail(trimmed);
-    track('early_access_submitted', { email: trimmed });
-    setSuccess(true);
+    const result = await submitEarlyAccessEmail(trimmed);
     setLoading(false);
+    if (!result.ok) {
+      setError(t('earlyAccess.submitError'));
+      return;
+    }
+    track('early_access_submitted');
+    setSuccess(true);
   };
 
   return (
