@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -36,8 +36,13 @@ export function ActionHubScreen({ navigation }: Props) {
     Linking.openURL('https://apps.apple.com').catch(() => undefined);
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     track('share_clicked');
+    try {
+      await Share.share({ message: t('actionHub.shareMessage') });
+    } catch {
+      // user dismissed the share sheet — nothing to do
+    }
   };
 
   return (
@@ -55,6 +60,12 @@ export function ActionHubScreen({ navigation }: Props) {
 
       <View style={styles.body}>
         <PrimaryButton label={t('actionHub.tryAnother')} onPress={handleTryAnother} />
+        <PrimaryButton
+          label={t('actionHub.history')}
+          variant="secondary"
+          icon="clock"
+          onPress={() => navigation.navigate('History')}
+        />
         <PrimaryButton
           label={t('actionHub.exploreApps')}
           variant="secondary"
@@ -74,8 +85,6 @@ export function ActionHubScreen({ navigation }: Props) {
           label={t('actionHub.share')}
           variant="ghost"
           icon="share"
-          disabled
-          soonLabel={t('common.comingSoon')}
           onPress={handleShare}
         />
         <PrimaryButton

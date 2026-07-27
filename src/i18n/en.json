@@ -63,7 +63,9 @@
     "exploreApps": "Explore More Apps",
     "earlyAccess": "Join Early Access",
     "share": "Share",
-    "rateApp": "Rate App"
+    "rateApp": "Rate App",
+    "shareMessage": "WSID — a calm ritual to hear what you already feel about a hard choice.",
+    "history": "Reflection history"
   },
   "appHub": {
     "title": "Explore More Apps",
@@ -112,5 +114,9 @@
     "optionALabel": "Option A",
     "optionBLabel": "Option B",
     "placeholder": "Type the option…"
+  },
+  "history": {
+    "title": "Your history",
+    "empty": "Your past reflections will appear here.\nTake your first round."
   }
 }

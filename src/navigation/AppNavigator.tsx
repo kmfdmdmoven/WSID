@@ -9,6 +9,7 @@ import { RevealAnimationScreen } from '../screens/RevealAnimationScreen';
 import { ResultScreen } from '../screens/ResultScreen';
 import { AdPlaceholderScreen } from '../screens/AdPlaceholderScreen';
 import { ActionHubScreen } from '../screens/ActionHubScreen';
+import { HistoryScreen } from '../screens/HistoryScreen';
 import { AppHubScreen } from '../screens/AppHubScreen';
 import { EarlyAccessScreen } from '../screens/EarlyAccessScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
@@ -32,6 +33,7 @@ export function AppNavigator() {
       <Stack.Screen name="Result" component={ResultScreen} />
       <Stack.Screen name="AdPlaceholder" component={AdPlaceholderScreen} />
       <Stack.Screen name="ActionHub" component={ActionHubScreen} />
+      <Stack.Screen name="History" component={HistoryScreen} />
       <Stack.Screen name="AppHub" component={AppHubScreen} />
       <Stack.Screen name="EarlyAccess" component={EarlyAccessScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />

@@ -22,6 +22,7 @@ export type AnalyticsEvent =
   | 'action_hub_opened'
   | 'try_another_clicked'
   | 'app_hub_opened'
+  | 'history_opened'
   | 'early_access_submitted'
   | 'share_clicked'
   | 'rate_app_clicked';

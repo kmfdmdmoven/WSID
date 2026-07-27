@@ -10,6 +10,20 @@ export interface SessionError {
 export type SessionResult = { ok: true } | { ok: false; error: SessionError };
 export type CreateSessionResult = { ok: true; id: string } | { ok: false; error: SessionError };
 
+export interface DecisionRow {
+  id: string;
+  question: string;
+  option_a: string;
+  option_b: string;
+  revealed_option: 'a' | 'b';
+  emotion: Emotion | null;
+  alternative_revealed: boolean;
+  created_at: string;
+}
+export type ListSessionsResult =
+  | { ok: true; rows: DecisionRow[] }
+  | { ok: false; error: SessionError };
+
 // Postgres error codes we care about; anything else is treated as transient
 // (network flake, cold start) so the caller may retry.
 function toSessionError(code: string | undefined, message: string): SessionError {
@@ -108,4 +122,18 @@ export async function canStartSession(): Promise<{ allowed: boolean; degraded: b
     return { allowed: true, degraded: true };
   }
   return { allowed: data === true, degraded: false };
+}
+
+/** Read this user's past rounds, newest first (RLS restricts to own rows). */
+export async function listSessions(limit = 50): Promise<ListSessionsResult> {
+  const { data, error } = await supabase
+    .from('decision_sessions')
+    .select('id, question, option_a, option_b, revealed_option, emotion, alternative_revealed, created_at')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) {
+    console.log('[sessions] listSessions failed', error.message);
+    return { ok: false, error: toSessionError(error.code, error.message) };
+  }
+  return { ok: true, rows: (data ?? []) as DecisionRow[] };
 }
