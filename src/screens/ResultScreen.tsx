@@ -47,9 +47,6 @@ export function ResultScreen({ navigation }: Props) {
   const [selectedEmotionId, setSelectedEmotionId] = useState<string | null>(null);
   const [showContinue, setShowContinue] = useState(false);
   const [reactionPhrase, setReactionPhrase] = useState('');
-  // Closing is picked in the result phase WITH the emotion — the phrase
-  // library has conditions.emotion; picking on mount ignored them.
-  const [closingPhrase, setClosingPhrase] = useState('');
 
   // Picked once per session mount — not re-picked on re-render
   const revealQuestion = useRef(selectText('reveal_question', 'What did you feel first?')).current;
@@ -116,13 +113,6 @@ export function ResultScreen({ navigation }: Props) {
       setTimeout(() => {
         setEmotion(emotion);
         track('emotion_selected', { emotion });
-        const closing = selectText(
-          'closing',
-          "This is not certainty. It's a signal worth listening to.",
-          { emotion },
-        );
-        console.log('[phrases] closing picked for', emotion, ':', closing);
-        setClosingPhrase(closing);
         if (sessionId) {
           updateEmotion(sessionId, emotion);
         }
@@ -247,7 +237,6 @@ export function ResultScreen({ navigation }: Props) {
         style={[styles.buttonArea, ctaStyle, { paddingBottom: insets.bottom + 16 }]}
         pointerEvents={showContinue ? 'auto' : 'none'}
       >
-        <Text style={styles.closing}>{closingPhrase}</Text>
         <PrimaryButton
           label="Continue"
           onPress={() => navigation.navigate('ActionHub')}
@@ -301,13 +290,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 8,
     gap: 12,
-  },
-  closing: {
-    color: colors.textMuted,
-    fontSize: 13,
-    textAlign: 'center',
-    fontStyle: 'italic',
-    letterSpacing: 0.2,
-    paddingHorizontal: 8,
   },
 });

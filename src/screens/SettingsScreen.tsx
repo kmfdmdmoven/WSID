@@ -104,13 +104,11 @@ export function SettingsScreen({ navigation }: Props) {
         <View style={styles.divider} />
 
         <View style={[styles.cardSection, styles.toggleRow]}>
-          <Text style={styles.sectionTitle}>{t('settings.sound')}</Text>
-          <Switch
-            value={settings.soundEnabled}
-            onValueChange={(soundEnabled) => updateSettings({ soundEnabled })}
-            trackColor={{ false: colors.cardBorder, true: colors.accentGold }}
-            thumbColor={colors.textPrimary}
-          />
+          {/* Sound playback not implemented yet — deliberate "coming soon", not a broken toggle */}
+          <Text style={[styles.sectionTitle, styles.soonTitle]}>{t('settings.sound')}</Text>
+          <View style={styles.soonBadge}>
+            <Text style={styles.soonText}>{t('common.comingSoon')}</Text>
+          </View>
         </View>
 
         <View style={styles.divider} />
@@ -193,6 +191,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  soonTitle: {
+    color: colors.disabledText,
+  },
+  soonBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  soonText: {
+    color: colors.disabledText,
+    fontSize: 12,
+    fontWeight: '500',
+    letterSpacing: 0.5,
   },
   dangerZone: {
     flex: 1,
