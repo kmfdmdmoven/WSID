@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { BackButton } from '../components/BackButton';
 import { ScreenContainer } from '../components/ScreenContainer';
+import { useDecision } from '../context/DecisionContext';
 import { useNeural } from '../context/NeuralContext';
 import { colors } from '../constants/colors';
 import { changeLanguage } from '../i18n';
@@ -23,6 +24,7 @@ export function SettingsScreen({ navigation }: Props) {
   });
 
   const { setNeuralMode } = useNeural();
+  const { resetSession } = useDecision();
 
   useFocusEffect(useCallback(() => { setNeuralMode('idle', 0.4); }, [setNeuralMode]));
 
@@ -52,6 +54,9 @@ export function SettingsScreen({ navigation }: Props) {
     }
     if (result.ok) {
       console.log('[settings] delete ok, resetting to Welcome');
+      // GDPR: the account is gone — the in-memory draft (question/options)
+      // must not leak to the next anonymous user on this device
+      resetSession();
       navigation.reset({ index: 0, routes: [{ name: 'Welcome' }] });
       return;
     }

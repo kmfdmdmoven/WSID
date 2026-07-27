@@ -90,6 +90,9 @@ export function ResultScreen({ navigation }: Props) {
   );
 
   useEffect(() => {
+    // resetSession() clears selectedOption while this screen is still in the
+    // nav stack — an empty value here means "reset", not "result shown"
+    if (!session.selectedOption) return;
     track('result_shown', { selectedOption: session.selectedOption });
   }, [session.selectedOption]);
 

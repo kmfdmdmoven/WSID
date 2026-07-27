@@ -25,7 +25,8 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
