@@ -1,6 +1,5 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
 import { getSavedLanguage } from '../services/storage';
 import type { Language } from '../types';
 import en from './en.json';
@@ -11,14 +10,10 @@ const resources = {
   uk: { translation: uk },
 };
 
-function getDeviceLanguage(): Language {
-  const locale = Localization.getLocales()[0]?.languageCode ?? 'en';
-  return locale === 'uk' ? 'uk' : 'en';
-}
-
 export async function initI18n(): Promise<void> {
+  // Default to English until the user picks otherwise (ignore device locale).
   const saved = await getSavedLanguage();
-  const lng = saved ?? getDeviceLanguage();
+  const lng: Language = saved ?? 'en';
 
   await i18n.use(initReactI18next).init({
     resources,

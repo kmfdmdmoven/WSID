@@ -30,11 +30,6 @@ export interface ThoughtObjectProps {
   breathing?: boolean;
 }
 
-const GLOW_COLOR: Record<ThoughtObjectProps['variant'], string> = {
-  answer:   colors.accentGold,
-  option:   colors.rationalBlue,
-  question: 'rgba(255,255,255,0.18)',
-};
 
 const FONT_SIZE: Record<ThoughtObjectProps['variant'], number> = {
   answer:   28,
@@ -162,9 +157,13 @@ export const ThoughtObject = forwardRef<ThoughtObjectHandle, ThoughtObjectProps>
 
     return (
       <View style={styles.outer}>
-        <Animated.View
-          style={[styles.bloom, { backgroundColor: GLOW_COLOR[variant] }, bloomStyle]}
-        />
+        {/* Soft gold halo — concentric circles fake a radial falloff so there's
+            no boxy edge and no per-frame native shadow. */}
+        <Animated.View style={[styles.bloomWrap, bloomStyle]} pointerEvents="none">
+          <View style={styles.bloomOuter} />
+          <View style={styles.bloomMid} />
+          <View style={styles.bloomInner} />
+        </Animated.View>
         {/* Wrapper gives 3D perspective for the rotateY flip */}
         <View style={styles.perspectiveWrap}>
           <Animated.View style={[styles.card, isGold && styles.cardGold, cardStyle]}>
@@ -198,13 +197,35 @@ const styles = StyleSheet.create({
     width: '100%',
     transform: [{ perspective: 900 }],
   },
-  bloom: {
+  bloomWrap: {
     position: 'absolute',
-    top: -28,
-    bottom: -28,
-    left: -28,
-    right: -28,
-    borderRadius: 52,
+    top: -64,
+    bottom: -64,
+    left: -64,
+    right: -64,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bloomOuter: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    borderRadius: 9999,
+    backgroundColor: 'rgba(234,179,8,0.035)',
+  },
+  bloomMid: {
+    position: 'absolute',
+    width: '74%',
+    height: '74%',
+    borderRadius: 9999,
+    backgroundColor: 'rgba(234,179,8,0.05)',
+  },
+  bloomInner: {
+    position: 'absolute',
+    width: '48%',
+    height: '48%',
+    borderRadius: 9999,
+    backgroundColor: 'rgba(234,179,8,0.07)',
   },
   card: {
     backgroundColor: colors.cardBackground,

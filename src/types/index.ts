@@ -36,10 +36,8 @@ export type RootStackParamList = {
   Options: undefined;
   RevealAnimation: undefined;
   Result: undefined;
-  AdPlaceholder: undefined;
   ActionHub: undefined;
   History: undefined;
-  AppHub: undefined;
   EarlyAccess: undefined;
   Settings: undefined;
 };
