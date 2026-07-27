@@ -9,7 +9,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { MindSpaceField } from '../components/MindSpaceField';
 import { ThoughtObject, ThoughtObjectHandle } from '../components/ThoughtObject';
 import { ReactionOrb } from '../components/ReactionOrb';
 import { SceneText } from '../components/SceneText';
@@ -161,8 +160,6 @@ export function ResultScreen({ navigation }: Props) {
 
   return (
     <View style={styles.root}>
-      <MindSpaceField mood={0.4} intensity={0.6} />
-
       {/* Center — ThoughtObject + contextual text */}
       {/* Card: top-anchored — position never changes when text/CTA appear */}
       <View style={[styles.center, { paddingTop: insets.top + 140 }]}>

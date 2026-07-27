@@ -216,13 +216,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  // answer variant: gold-tinted card with breathing gold border (prototype)
+  // answer variant: gold-tinted card with breathing gold border (prototype).
+  // No native shadow here — a large blurred shadow on a continuously
+  // scaling/drifting view re-rasterizes every frame (visible stutter). The
+  // gold aura comes from the animated `bloom` view behind the card instead.
   cardGold: {
     backgroundColor: 'rgba(234,179,8,0.06)',
-    shadowColor: colors.accentGold,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.18,
-    shadowRadius: 30,
   },
   label: {
     color: colors.textSecondary,
