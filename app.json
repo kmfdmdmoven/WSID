@@ -3,7 +3,7 @@
     "name": "What Should I Do?",
     "slug": "what-should-i-do",
     "owner": "mister_v",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -23,10 +23,12 @@
       "package": "com.dvatipa.wsid",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundColor": "#000000"
+        "backgroundImage": "./assets/android-icon-background.png",
+        "backgroundColor": "#000000",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "versionCode": 3
+      "versionCode": 6
     },
     "web": {
       "favicon": "./assets/favicon.png"

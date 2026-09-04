@@ -352,18 +352,47 @@ function cvgOf(pull: number): number {
   return Math.min(Math.max(pull, -0.05) * 40, 0.9);
 }
 
-// Position uses phaseAcc (not time*speed) so speed changes feel like
-// acceleration rather than position teleports.
-function nx(seed: Seed, t: number, w: number, pull: number, ampFactor: number): number {
+function hash01(n: number): number {
   'worklet';
-  const x = seed.bx + Math.sin(t * seed.sx * seed.freqJitter + seed.phase) * seed.amp * ampFactor;
+  const x = Math.sin(n * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+// Slowly migrates a "home" coordinate between pseudo-random waypoints across
+// the full dimension, on a real-time (not mode-speed-scaled) clock — so a
+// fixed bright element (dominant node / ambient blob) doesn't stay glued to
+// one spot for the whole session. `identity` desyncs the per-element phase.
+function wanderCoord(identity: number, period: number, realTime: number, dim: number, axisSalt: number): number {
+  'worklet';
+  const segT = realTime / period + identity;
+  const seg = Math.floor(segT);
+  const frac = smoothstep(segT - seg);
+  const margin = dim * 0.12;
+  const span = dim - margin * 2;
+  const from = margin + hash01(seg * 17.13 + axisSalt + identity * 5.7) * span;
+  const to = margin + hash01((seg + 1) * 17.13 + axisSalt + identity * 5.7) * span;
+  return lerp(from, to, frac);
+}
+
+// Position uses phaseAcc (not time*speed) so speed changes feel like
+// acceleration rather than position teleports. realTime (wall-clock seconds,
+// unaffected by mode speed) drives the slow home-wander for dominant nodes.
+function nx(seed: Seed, t: number, w: number, pull: number, ampFactor: number, realTime: number): number {
+  'worklet';
+  const base = seed.tier === 'dominant'
+    ? wanderCoord(seed.phase, 22 + seed.colorIndex * 4, realTime, w, 11)
+    : seed.bx;
+  const x = base + Math.sin(t * seed.sx * seed.freqJitter + seed.phase) * seed.amp * ampFactor;
   const cvg = cvgOf(pull);
   return cvg !== 0 ? x + (FOCUS_X * w - x) * cvg : x;
 }
 
-function ny(seed: Seed, t: number, h: number, pull: number, ampFactor: number): number {
+function ny(seed: Seed, t: number, h: number, pull: number, ampFactor: number, realTime: number): number {
   'worklet';
-  const y = seed.by + Math.cos(t * seed.sy * seed.freqJitter + seed.phase * 1.3) * seed.amp * ampFactor;
+  const base = seed.tier === 'dominant'
+    ? wanderCoord(seed.phase, 22 + seed.colorIndex * 4, realTime, h, 53)
+    : seed.by;
+  const y = base + Math.cos(t * seed.sy * seed.freqJitter + seed.phase * 1.3) * seed.amp * ampFactor;
   const cvg = cvgOf(pull);
   return cvg !== 0 ? y + (FOCUS_Y * h - y) * cvg : y;
 }
@@ -373,13 +402,14 @@ function ny(seed: Seed, t: number, h: number, pull: number, ampFactor: number): 
 // 3 blobs, slow orbit, drawn toward focus with convergence).
 
 const BLOBS = [
-  { x: 0.24, y: 0.30, r: 0.34, a: 0.10, sp: 0.05, ph: 0.0 },
-  { x: 0.42, y: 0.62, r: 0.42, a: 0.07, sp: 0.04, ph: 2.1 },
-  { x: 0.80, y: 0.15, r: 0.22, a: 0.06, sp: 0.06, ph: 4.0 },
+  { x: 0.24, y: 0.30, r: 0.34, a: 0.08, sp: 0.05, ph: 0.0 },
+  { x: 0.42, y: 0.62, r: 0.42, a: 0.055, sp: 0.04, ph: 2.1 },
+  { x: 0.80, y: 0.15, r: 0.22, a: 0.045, sp: 0.06, ph: 4.0 },
 ] as const;
 
-function AmbientBlob({ blob, time, configSV, prevConfigSV, modeProgress, w, h }: {
+function AmbientBlob({ blob, blobIndex, time, configSV, prevConfigSV, modeProgress, w, h }: {
   blob: (typeof BLOBS)[number];
+  blobIndex: number;
   time: { value: number };
   configSV: { value: ModeConfig };
   prevConfigSV: { value: ModeConfig };
@@ -389,13 +419,15 @@ function AmbientBlob({ blob, time, configSV, prevConfigSV, modeProgress, w, h }:
   const cx = useDerivedValue(() => {
     const p = modeProgress.value;
     const cvg = cvgOf(lerp(prevConfigSV.value.pull, configSV.value.pull, p));
-    const bx = (blob.x + Math.cos(time.value * blob.sp + blob.ph) * 0.03) * w;
+    const home = wanderCoord(blobIndex + 0.37, 30 + blobIndex * 6, time.value, w, 7);
+    const bx = home + Math.cos(time.value * blob.sp + blob.ph) * 0.03 * w;
     return bx + (FOCUS_X * w - bx) * cvg * 0.6;
   });
   const cy = useDerivedValue(() => {
     const p = modeProgress.value;
     const cvg = cvgOf(lerp(prevConfigSV.value.pull, configSV.value.pull, p));
-    const by = (blob.y + Math.sin(time.value * blob.sp * 0.7 + blob.ph) * 0.03) * h;
+    const home = wanderCoord(blobIndex + 0.37, 30 + blobIndex * 6, time.value, h, 41);
+    const by = home + Math.sin(time.value * blob.sp * 0.7 + blob.ph) * 0.03 * h;
     return by + (FOCUS_Y * h - by) * cvg * 0.6;
   });
   const r = useDerivedValue(() =>
@@ -407,7 +439,12 @@ function AmbientBlob({ blob, time, configSV, prevConfigSV, modeProgress, w, h }:
     const prv = prevConfigSV.value;
     const ampFactor = lerp(prv.ampFactor, cfg.ampFactor, p);
     const cvg = cvgOf(lerp(prv.pull, cfg.pull, p));
-    return blob.a * (0.5 + ampFactor * 0.5) * (1 + cvg * 0.9);
+    // Slow heartbeat-shaped breathing WITH a genuine rest phase (like the
+    // dominant nodes) instead of a nonstop sine — reads as breathing, not a
+    // metronome stuck on the same spot.
+    const pulse = heartbeatPulse(time.value / 7 + blob.ph, 1);
+    const base = blob.a * (0.30 + pulse * 0.70);
+    return base * (0.5 + ampFactor * 0.5) * (1 + cvg * 0.9);
   });
   const center = useDerivedValue(() => vec(cx.value, cy.value));
   return (
@@ -455,7 +492,7 @@ function AnimatedDot({ seed, index, time, phaseAcc, breathPhase, beatPhase, conf
     const ampFactor = lerp(prv.ampFactor, cfg.ampFactor, p);
     // Global breathing — each stage has its own breath signature (period in s)
     const breathe = 0.78 + 0.22 * Math.sin(breathPhase.value * TWO_PI);
-    let x = nx(seed, phaseAcc.value, w, pull, ampFactor * breathe);
+    let x = nx(seed, phaseAcc.value, w, pull, ampFactor * breathe, time.value);
     // Activating: searchers sweep along the screen perimeter
     if (seed.searcher) {
       const search = lerp(prv.search, cfg.search, p);
@@ -481,7 +518,7 @@ function AnimatedDot({ seed, index, time, phaseAcc, breathPhase, beatPhase, conf
     const pull = lerp(prv.pull, cfg.pull, cfg.pull < prv.pull ? easeOutBack(p) : pp);
     const ampFactor = lerp(prv.ampFactor, cfg.ampFactor, p);
     const breathe = 0.78 + 0.22 * Math.sin(breathPhase.value * TWO_PI);
-    let y = ny(seed, phaseAcc.value, h, pull, ampFactor * breathe);
+    let y = ny(seed, phaseAcc.value, h, pull, ampFactor * breathe, time.value);
     // Negative: risers slowly float upward — the doubt that departs
     if (seed.riser) {
       const cut = lerp(prv.edgeCut, cfg.edgeCut, p);
@@ -716,13 +753,17 @@ export function NeuralThoughtNetwork({ mode, intensity = 1, style }: Props) {
     return Math.max(0, base + Math.sin(time.value * cfg.brightFreq * TWO_PI + Math.PI * 0.5) * 0.09);
   });
 
+  // Real rest phase (heartbeat-shaped) instead of a nonstop sine that never
+  // dims below ~40-70% — the old formula read as a "signal light" beacon
+  // sitting behind the revealed thought/option, never actually going quiet.
   const centerOpacity = useDerivedValue(() => {
     const p = modeProgress.value;
     const cfg = configSV.value;
     const prv = prevConfigSV.value;
     const glow = lerp(prv.centerGlow, cfg.centerGlow, p);
     if (glow < 0.005) return 0;
-    return Math.max(0, glow * (0.7 + Math.sin(time.value * cfg.centerGlowFreq * TWO_PI) * 0.3));
+    const pulse = heartbeatPulse(time.value, cfg.centerGlowFreq);
+    return Math.max(0, glow * (0.15 + pulse * 0.85) * 0.85);
   });
 
   const centerNegOpacity = useDerivedValue(() => {
@@ -731,7 +772,8 @@ export function NeuralThoughtNetwork({ mode, intensity = 1, style }: Props) {
     const prv = prevConfigSV.value;
     const glow = lerp(prv.centerNegGlow, cfg.centerNegGlow, p);
     if (glow < 0.005) return 0;
-    return Math.max(0, glow * (0.6 + Math.sin(time.value * cfg.centerNegFreq * TWO_PI) * 0.4));
+    const pulse = heartbeatPulse(time.value, cfg.centerNegFreq);
+    return Math.max(0, glow * (0.15 + pulse * 0.85) * 0.85);
   });
 
   // ── Connection paths — use phaseAcc for positions ─────────────────────────
@@ -754,8 +796,8 @@ export function NeuralThoughtNetwork({ mode, intensity = 1, style }: Props) {
     const path = Skia.Path.Make();
     const xs: number[] = []; const ys: number[] = [];
     for (let i = 0; i < seeds.length; i++) {
-      xs.push(nx(seeds[i], t, width, pull, ampFactor * breathe));
-      ys.push(ny(seeds[i], t, height, pull, ampFactor * breathe));
+      xs.push(nx(seeds[i], t, width, pull, ampFactor * breathe, time.value));
+      ys.push(ny(seeds[i], t, height, pull, ampFactor * breathe, time.value));
     }
     for (let i = 0; i < seeds.length; i++) {
       for (let j = i + 1; j < seeds.length; j++) {
@@ -793,8 +835,8 @@ export function NeuralThoughtNetwork({ mode, intensity = 1, style }: Props) {
     const path = Skia.Path.Make();
     const xs: number[] = []; const ys: number[] = [];
     for (let i = 0; i < seeds.length; i++) {
-      xs.push(nx(seeds[i], t, width, pull, ampFactor * breathe));
-      ys.push(ny(seeds[i], t, height, pull, ampFactor * breathe));
+      xs.push(nx(seeds[i], t, width, pull, ampFactor * breathe, time.value));
+      ys.push(ny(seeds[i], t, height, pull, ampFactor * breathe, time.value));
     }
     for (let i = 0; i < seeds.length; i++) {
       for (let j = i + 1; j < seeds.length; j++) {
@@ -829,6 +871,7 @@ export function NeuralThoughtNetwork({ mode, intensity = 1, style }: Props) {
         <AmbientBlob
           key={`blob-${i}`}
           blob={blob}
+          blobIndex={i}
           time={time}
           configSV={configSV}
           prevConfigSV={prevConfigSV}
